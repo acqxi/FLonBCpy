@@ -1,4 +1,5 @@
 import requests
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -23,6 +24,16 @@ class Net(nn.Module):
         x = F.relu(self.fc2(x))
         return self.fc3(x)
 
+    def get_model_hash(weight):
+        files = {
+            'weight': (weight),
+        }
+
+        response = requests.post('https://ipfs.infura.io:5001/api/v0/add', files=files)
+        p = response.json()
+        hash = p['Hash']
+        return hash
+
     def load_model_by_hash(hash):
         params = (
             ('arg', hash),
@@ -30,4 +41,6 @@ class Net(nn.Module):
         response = requests.post('https://ipfs.infura.io:5001/api/v0/block/get', params=params)
         print(response.text)
 
-Net.load_model_by_hash('QmV71UtcuZPhL3X39bFr8xiCZmwXyxsZsaj8nkAnSjfX3D')
+# Try 'Hello World'
+print('hash:', Net.get_model_hash('Hello World'))
+Net.load_model_by_hash(str(Net.get_model_hash('Hello World')))
