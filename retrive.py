@@ -1,6 +1,7 @@
 import requests
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
