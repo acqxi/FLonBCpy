@@ -1,4 +1,5 @@
 import requests
+import time
 
 import torch
 import torch.nn as nn
@@ -41,6 +42,31 @@ class Net(nn.Module):
         response = requests.post('https://ipfs.infura.io:5001/api/v0/block/get', params=params)
         print(response.text)
 
-# Try 'Hello World'
+# TEST 1
+WEIGHT = 'Hello World!'
+start_time = time.time()
+print('hash:', Net.get_model_hash(WEIGHT))
+Net.load_model_by_hash(Net.get_model_hash(WEIGHT))
+print('time cost:', time.time()-start_time)
+
+# TEST 2
+start_time = time.time()
 print('hash:', Net.get_model_hash('Hello World'))
 Net.load_model_by_hash(str(Net.get_model_hash('Hello World')))
+print('time cost:', time.time()-start_time)
+
+########### Output 1 ###########
+# hash: Qmf1rtki74jvYmGeqaaV51hzeiaa6DyWc98fzDiuPatzyy
+    
+# Hello World!
+
+# time cost: 2.7858269214630127
+################################
+    
+########### Output 2 ###########
+# hash: QmUXTtySmd7LD4p6RG6rZW6RuUuPZXTtNMmRQ6DSQo3aMw
+
+# Hello World
+
+# time cost: 2.6761679649353027
+################################
