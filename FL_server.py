@@ -4,6 +4,7 @@ import numpy as np
 import flwr as fl
 from flwr.common import Metrics
 
+# Choose which nodes
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -23,12 +24,14 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         results,
         failures,
     ) -> Optional[fl.common.Weights]:
-        weights = super().aggregate_fit(rnd, results, failures)
+        # weights = super().aggregate_fit(rnd, results, failures)
+        weights = weighted_average
         if weights is not None:
             # Save weights
             print(f"Saving round {rnd} weights...")
             np.savez(f"round-{rnd}-weights.npz", *weights)
         return weights
+
 
 # Define strategy
 strategy = SaveModelStrategy(
@@ -44,7 +47,8 @@ strategy = SaveModelStrategy(
 
 # Start Flower server
 fl.server.start_server(
-    server_address="localhost:8080",
-    config={"num_rounds": 3},
-    strategy=strategy,
+    # server_address="localhost:8080",
+    server_address = 'localhost:' + input("Enter server PORT:"),
+    config = {"num_rounds": 3},
+    strategy = strategy,
 )
