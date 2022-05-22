@@ -99,8 +99,12 @@ class FlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(net, testloader)
+        # print('loss:', loss, 'accuracy:', accuracy)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_numpy_client("localhost:8080", client=FlowerClient())
+if __name__=="__main__":
+    server_address = 'localhost:' + input("Enter server PORT:")
+    
+    # Start Flower client
+    fl.client.start_numpy_client(str(server_address), client=FlowerClient())
