@@ -27,7 +27,7 @@ class Net(nn.Module):
 
     def get_model_hash(weight):
         files = {
-            'weight': (weight),
+            'weight': (open('round-3-weights.npz', 'rb')),
         }
 
         response = requests.post('https://ipfs.infura.io:5001/api/v0/add', files=files)
