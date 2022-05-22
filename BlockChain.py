@@ -1,15 +1,10 @@
 import hashlib
-import json
-from re import L
-from time import time
-from urllib.parse import urlparse
-from uuid import uuid4
-
-from FL_model import Net
 import requests
-from flask import Flask, jsonify, request
-
-NUM_ZEROS = 4
+from time import time
+from FL_model import Net
+from random import randint
+        
+NUM_ZEROS = 5
 class Blockchain:
     def __init__(self):
         self.master_chain = []
@@ -48,11 +43,21 @@ class Blockchain:
         if (block['index'] != 0):
             while self.calculate_hash(block)[0:NUM_ZEROS] != '0' * NUM_ZEROS:
                 block['nonce'] += 1
-                time.sleep(0.001)
+                # time.sleep(0.0001)
+        
         return block
     
-    def send_block_to_peers(self, block):
-        pass
+    def send_block(self, block):
+        for node in self.peer_nodes:
+            url = f'http://{node}/send_block'
+            requests.post(url, data=block)
+
+    def get_chain(self):
+        rand = randint(0, len(self.peer_nodes)-1)
+        r = requests.get(f'http://{self.peer_nodes[rand]}/get_chain')
+        if r.status_code == requests.codes.ok:
+            data = r.json()
+            print(data)
 
     def mining(self):
         block = {
@@ -69,7 +74,7 @@ class Blockchain:
         if (self.calculate_hash(self.master_chain[-1]) == block["previous_hash"]):
             self.block = block
             self.master_chain.append(self.block)
-            self.send_block_to_peers(self.block)
+            self.send_block(self.block)
 
     def update_backup_chains(self):
         for backup_chain in self.backup_chains:
@@ -111,6 +116,9 @@ class Blockchain:
                 elif (len(new_chain) > len(self.master_chain)-6):
                     self.backup_chains.remove(new_chain[:-1])
                     self.backup_chains.append(new_chain)
+            else:
+                # orphan block
+                self.get_full_chain()
 
     def calculate_acc(self, model_hash):
         acc = 80
@@ -152,6 +160,7 @@ class Blockchain:
             self.update_local_chains(block)
 
 
+
 # # Instantiate the Node
 # app = Flask(__name__)
 
@@ -160,6 +169,7 @@ class Blockchain:
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
+blockchain.mining()
 print(blockchain.master_chain)
 
 # @app.route('/mine', methods=['GET'])
