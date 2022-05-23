@@ -1,7 +1,11 @@
 # %%
 from typing import Any, Dict, List, Tuple, Union
-import matplotlib.pyplot as plt
+
+import matplotlib
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+
+%matplotlib inline
 
 
 # %%
@@ -47,25 +51,35 @@ class ChainRecord():
                 f', pos: ({self.block_chain_pos[ pre ]}, {self.block_time_pos[ pre ]})',
                 f'-> ({self.block_chain_pos[ idx ]}, {self.block_time_pos[ idx ]})' )
 
-    def show_chain( self, needUpdate: bool = False ) -> None:
+    def show_chain( self, limit: int = -1, debug:bool=True ) -> None:
         ax = plt.gca()
         ax.set_xlabel( 'time' )
         ax.set_ylabel( 'chains' )
         ax.set_title( 'BlockChain' )
-        grid_size = max( max( self.block_time_pos ), len( self.block_chain_pos ) )
+        grid_size = max( max( self.block_time_pos ), len( self.chains_members ) ) + 1
         ax.set_xlim( -1, grid_size )
-        ax.set_ylim( int( -0.5 * grid_size ), int( 0.5 * grid_size ) )
+        ax.set_ylim(
+            int( -0.5 * grid_size + len( self.chains_members ) / 2 ), int( 0.5 * grid_size + len( self.chains_members ) / 2 ) )
         ax.xaxis.set_major_locator( plt.MaxNLocator( 1 ) )
         ax.yaxis.set_major_locator( plt.MaxNLocator( 1 ) )
         ax.grid( True )
         for i, data in enumerate( self.blockchain ):
+            if limit > 0 and i > limit:
+                break
             color = list( mcolors.TABLEAU_COLORS.keys() )[ self.block_chain_pos[ i ] % len( mcolors.TABLEAU_COLORS ) ]
             y1, x1 = self.block_chain_pos[ data[ 'pre' ] ], self.block_time_pos[ data[ 'pre' ] ]
             y2, x2 = self.block_chain_pos[ i ], self.block_time_pos[ i ]
-            print( f'draw: ({x1},{y1}) -> ({x2},{y2})' )
+            if debug : print( f'draw: ({x1},{y1}) -> ({x2},{y2})' )
             plt.scatter( x2, y2, c=color )
             plt.plot( ( x1, x2 ), ( y1, y2 ), c=color )
         plt.show()
+
+    def show_chain_animation( self ) -> None:
+        if 'inline' in matplotlib.get_backend():
+            from IPython import display
+        for i in range( len( self.blockchain ) ):
+            self.show_chain( i , debug=False)
+            display.clear_output(wait=True)
 
 
 # %%
@@ -81,4 +95,6 @@ chain_record.blockchain = [ {
 } for i, p in enumerate( tmp ) ]
 chain_record.re_calcu_all_block()
 chain_record.show_chain()
+# %%
+chain_record.show_chain_animation()
 # %%
