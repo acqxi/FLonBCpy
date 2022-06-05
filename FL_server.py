@@ -1,5 +1,6 @@
 from typing import List, Tuple, Optional
 import numpy as np
+from pathlib import Path
 
 import flwr as fl
 from flwr.common import Metrics
@@ -24,8 +25,8 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
         results,
         failures,
     ) -> Optional[fl.common.Weights]:
-        # weights = super().aggregate_fit(rnd, results, failures)
-        weights = weighted_average
+        weights = super().aggregate_fit(rnd, results, failures)
+        # weights = weighted_average
         if weights is not None:
             # Save weights
             print(f"Saving round {rnd} weights...")
@@ -35,9 +36,11 @@ class SaveModelStrategy(fl.server.strategy.FedAvg):
 
 # Define strategy
 strategy = SaveModelStrategy(
-    fraction_fit=1.0,
-    min_fit_clients=2,
-    min_available_clients=2,
+    fraction_fit = 0.5,
+    fraction_eval = 0.5,
+    min_fit_clients = 8,
+    min_eval_clients = 8,
+    min_available_clients = 8,
     # eval_fn=get_eval_fn(testloader),
     # on_fit_config_fn=fit_config,
 )
@@ -49,6 +52,11 @@ strategy = SaveModelStrategy(
 fl.server.start_server(
     # server_address="localhost:8080",
     server_address = 'localhost:' + input("Enter server PORT:"),
-    config = {"num_rounds": 3},
-    strategy = strategy,
+    config = {"num_rounds": 8, "round_time": 6.0},
+    certificates=(
+        Path("/crts/root.pem").read_bytes(),
+        Path("/crts/localhost.crt").read_bytes(),
+        Path("/crts/localhost.key").read_bytes()
+    ),
+    strategy = strategy
 )
