@@ -1,4 +1,5 @@
 import warnings
+from pathlib import Path
 from collections import OrderedDict
 
 import flwr as fl
@@ -103,8 +104,9 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-if __name__=="__main__":
-    server_address = 'localhost:' + input("Enter server PORT:")
-    
-    # Start Flower client
-    fl.client.start_numpy_client(str(server_address), client=FlowerClient())
+# Start Flower client
+fl.client.start_numpy_client(
+    server_address = 'localhost:' + input("Enter server PORT:"),
+    root_certificates = Path("/crts/root.pem").read_bytes(),
+    client = FlowerClient()
+)
