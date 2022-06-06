@@ -1,4 +1,5 @@
 # %%
+import time
 from typing import Any, Dict, List, Tuple, Union
 
 import matplotlib
@@ -64,7 +65,7 @@ class ChainRecord():
         ax.yaxis.set_major_locator( plt.MaxNLocator( 1 ) )
         ax.grid( True )
         for i, data in enumerate( self.blockchain ):
-            if limit > 0 and i > limit:
+            if limit >= 0 and i > limit:
                 break
             color = list( mcolors.TABLEAU_COLORS.keys() )[ self.block_chain_pos[ i ] % len( mcolors.TABLEAU_COLORS ) ]
             y1, x1 = self.block_chain_pos[ data[ 'pre' ] ], self.block_time_pos[ data[ 'pre' ] ]
@@ -74,11 +75,12 @@ class ChainRecord():
             plt.plot( ( x1, x2 ), ( y1, y2 ), c=color )
         plt.show()
 
-    def show_chain_animation( self ) -> None:
+    def show_chain_animation( self , wait:float=1) -> None:
         if 'inline' in matplotlib.get_backend():
             from IPython import display
         for i in range( len( self.blockchain ) ):
             self.show_chain( i , debug=False)
+            time.sleep(wait)
             display.clear_output(wait=True)
 
 
